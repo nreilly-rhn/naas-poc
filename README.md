@@ -2,7 +2,7 @@
 
 Git paths inside the Argo CD Applications are `platform` and `tenants/<name>`.
 
-The manifests install the OpenShift GitOps operator on ROSA and reconcile one namespace per customer. Each tenant directory creates a namespace, a resource quota, a limit range, an ingress network policy, and three `RoleBindings`. A second Application creates an `AppProject` on the shared `openshift-gitops` instance so that tenant can deploy workloads into its own namespace. GitOps self-heal restores the quota, limits, network policy, and these bindings if a namespace admin changes them.
+The manifests install the OpenShift GitOps operator on ROSA and reconcile one namespace per customer. Each tenant directory creates a namespace, a resource quota, a limit range, an ingress network policy, and three `RoleBindings`. A second Application creates an `AppProject` on the shared `openshift-gitops` instance so that tenant can deploy workloads into its own namespace. GitOps self-heal restores the quota, limits, network policy, and these bindings if a namespace admin changes them. Each namespace is labeled `argocd.argoproj.io/managed-by: openshift-gitops`. `platform/controller-rbac.yaml` lets the GitOps application controller create the quota, limit range, and network policy.
 
 Argo CD tracks `https://github.com/nreilly-rhn/naas-poc.git` on branch `main`. That URL is set in:
 

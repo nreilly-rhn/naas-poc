@@ -3,6 +3,7 @@ kind: Kustomization
 resources:
   - appproject.yaml
   - appproject-control.yaml
+  - controller-rbac.yaml
   - applicationset.yaml
   - applicationset-projects.yaml
   - root-application.yaml
