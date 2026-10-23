@@ -1,0 +1,13 @@
+# Sample merge patch for the operator-owned openshift-gitops Argo CD instance.
+# This file is not part of bootstrap/kustomization.yaml.
+# An empty defaultPolicy denies every authenticated user. cluster-admins keep
+# role:admin. Tenant groups receive only the roles on their AppProject.
+# Apply once, after the openshift-gitops instance exists:
+#   oc patch argocd openshift-gitops -n openshift-gitops --type=merge --patch-file bootstrap/argocd-rbac.yaml
+spec:
+  rbac:
+    defaultPolicy: ""
+    policy: |
+      g, system:cluster-admins, role:admin
+      g, cluster-admins, role:admin
+    scopes: "[groups]"

@@ -1,0 +1,4 @@
+name: naas-example
+namespaceAdmins: naas-example-admins
+namespaceDevs: naas-example-devs
+namespaceRo: naas-example-ro

@@ -1,0 +1,50 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: naas-example
+  namespace: openshift-gitops
+spec:
+  description: Workload project for tenant naas-example
+  sourceRepos:
+    - "*"
+  destinations:
+    - namespace: naas-example
+      server: https://kubernetes.default.svc
+  # No clusterResourceWhitelist: cluster-scoped resources are denied.
+  namespaceResourceBlacklist:
+    - group: ""
+      kind: ResourceQuota
+    - group: ""
+      kind: LimitRange
+    - group: networking.k8s.io
+      kind: NetworkPolicy
+    - group: rbac.authorization.k8s.io
+      kind: Role
+    - group: rbac.authorization.k8s.io
+      kind: RoleBinding
+  roles:
+    - name: admin
+      description: namespace-admins
+      policies:
+        - p, proj:naas-example:admin, applications, *, naas-example/*, allow
+        - p, proj:naas-example:admin, logs, get, naas-example/*, allow
+      groups:
+        - naas-example-admins
+    - name: dev
+      description: namespace-devs
+      policies:
+        - p, proj:naas-example:dev, applications, get, naas-example/*, allow
+        - p, proj:naas-example:dev, applications, create, naas-example/*, allow
+        - p, proj:naas-example:dev, applications, update, naas-example/*, allow
+        - p, proj:naas-example:dev, applications, sync, naas-example/*, allow
+        - p, proj:naas-example:dev, applications, action/*, naas-example/*, allow
+        - p, proj:naas-example:dev, logs, get, naas-example/*, allow
+      groups:
+        - naas-example-devs
+    - name: readonly
+      description: namespace-ro
+      policies:
+        - p, proj:naas-example:readonly, applications, get, naas-example/*, allow
+        - p, proj:naas-example:readonly, logs, get, naas-example/*, allow
+      groups:
+        - naas-example-ro

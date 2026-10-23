@@ -1,0 +1,36 @@
+# Sample cluster OAuth provider for Entra ID.
+# This file is not part of bootstrap/kustomization.yaml.
+# Create the client secret in openshift-config, replace the angle-bracket
+# placeholders, then apply this file on its own. spec.identityProviders
+# replaces the cluster list, so keep any existing providers in this list.
+# Register redirect URI:
+# https://oauth-openshift.apps.<cluster-domain>/oauth2callback/entra
+apiVersion: config.openshift.io/v1
+kind: OAuth
+metadata:
+  name: cluster
+spec:
+  identityProviders:
+    - name: entra
+      mappingMethod: claim
+      type: OpenID
+      openID:
+        clientID: <application-client-id>
+        clientSecret:
+          name: entra-client-secret
+        # Several customer Entra tenants. For one directory, use
+        # https://login.microsoftonline.com/<entra-tenant-id>/v2.0
+        issuer: https://login.microsoftonline.com/organizations/v2.0
+        extraScopes:
+          - profile
+          - email
+        claims:
+          preferredUsername:
+            - preferred_username
+          email:
+            - email
+          name:
+            - name
+          # Entra app role values: <namespace>-admins, <namespace>-devs, <namespace>-ro
+          groups:
+            - roles

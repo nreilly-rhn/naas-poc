@@ -1,0 +1,17 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: naas-control
+  namespace: openshift-gitops
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+spec:
+  description: Creates tenant AppProjects on the shared Argo CD instance
+  sourceRepos:
+    - https://github.com/nreilly-rhn/naas-poc.git
+  destinations:
+    - namespace: openshift-gitops
+      server: https://kubernetes.default.svc
+  namespaceResourceWhitelist:
+    - group: argoproj.io
+      kind: AppProject

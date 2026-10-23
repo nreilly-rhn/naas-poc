@@ -1,0 +1,12 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: naas-example
+labels:
+  - pairs:
+      naas.naramajac.xyz/tenant: naas-example
+    includeSelectors: false
+resources:
+  - ../../components/tenant
+patches:
+  - path: quota-patch.yaml
+  - path: rolebinding-patch.yaml

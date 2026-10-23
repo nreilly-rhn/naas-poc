@@ -1,0 +1,46 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: naas-tenants
+  namespace: openshift-gitops
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  goTemplate: true
+  goTemplateOptions: ["missingkey=error"]
+  generators:
+    - git:
+        repoURL: https://github.com/nreilly-rhn/naas-poc.git
+        revision: main
+        files:
+          - path: tenants/*/tenant.yaml
+  template:
+    metadata:
+      name: "{{.name}}"
+      labels:
+        naas.naramajac.xyz/tenant: "{{.name}}"
+      finalizers:
+        - resources-finalizer.argocd.argoproj.io
+    spec:
+      project: naas
+      source:
+        repoURL: https://github.com/nreilly-rhn/naas-poc.git
+        targetRevision: main
+        path: "tenants/{{.path.basename}}"
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: "{{.name}}"
+      ignoreDifferences:
+        - group: ""
+          kind: Namespace
+          jsonPointers:
+            - /metadata/annotations/openshift.io~1sa.scc.mcs
+            - /metadata/annotations/openshift.io~1sa.scc.supplemental-groups
+            - /metadata/annotations/openshift.io~1sa.scc.uid-range
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=false
+          - PrunePropagationPolicy=foreground
