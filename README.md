@@ -22,7 +22,8 @@ Apply the manifests with a cluster-admin kubeconfig. The ROSA cluster must be ab
 - `bootstrap/` installs the OpenShift GitOps operator. Apply it once. `bootstrap/oauth.yaml` and `bootstrap/argocd-rbac.yaml` are samples and are not applied with the operator.
 - `platform/` holds the `naas` and `naas-control` AppProjects, the tenant ApplicationSets, and the root Application.
 - `components/tenant/` holds the shared namespace guardrails.
-- `tenants/<name>/` is one customer. `tenants/naas-example/` is the copy-paste reference. `argocd/` is that tenant's Argo CD project.
+- `tenants/<name>/` is one customer. `tenants/naas-example/` is the copy-paste reference. `argocd/` is that tenant's Argo CD project. `tenants/acme/` and `tenants/globex/` are dummy organizations for local login.
+- `testing/` holds the local users and OpenShift groups for those two organizations. It is not synced by Argo CD.
 
 ## Bootstrap
 
@@ -61,6 +62,41 @@ rosa create idp \
 ```
 
 `bootstrap/oauth.yaml` is the same provider as a cluster `OAuth` object. The CLI stores the client secret itself, so leave that sample unapplied when the identity provider is created with `rosa`.
+
+## Local users
+
+Acme and Globex are dummy organizations for a test cluster that has no external identity provider. Their tenant directories are `tenants/acme` and `tenants/globex`. Each has the usual three groups.
+
+`testing/users.htpasswd` contains APR1 hashes for the local accounts. Every account uses the password `NaasLocal-Test1`. Create the identity provider from that file, then apply the groups. Group membership is what puts a user into `<namespace>-admins`, `<namespace>-devs`, or `<namespace>-ro`.
+
+```bash
+rosa create idp \
+  --type=htpasswd \
+  --cluster=<cluster-name> \
+  --name=htpasswd \
+  --from-file=testing/users.htpasswd
+oc apply -k testing
+```
+
+| User | Group | Namespace |
+| --- | --- | --- |
+| `acme-admin` | `acme-admins` | `acme` |
+| `acme-dev` | `acme-devs` | `acme` |
+| `acme-reader` | `acme-ro` | `acme` |
+| `globex-admin` | `globex-admins` | `globex` |
+| `globex-dev` | `globex-devs` | `globex` |
+| `globex-reader` | `globex-ro` | `globex` |
+
+The identity provider takes a minute or two to become available. Then:
+
+```bash
+oc login --username=acme-admin --password='NaasLocal-Test1'
+oc whoami --show-groups
+oc auth can-i create deployment -n acme
+oc auth can-i create deployment -n globex
+```
+
+`acme-admin` can create workloads in `acme`. The same check in `globex` is denied. `globex-reader` can get objects in `globex` and cannot create them.
 
 ## Tenant Argo CD
 

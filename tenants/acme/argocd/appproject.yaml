@@ -1,0 +1,50 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: acme
+  namespace: openshift-gitops
+spec:
+  description: Workload project for tenant acme
+  sourceRepos:
+    - "*"
+  destinations:
+    - namespace: acme
+      server: https://kubernetes.default.svc
+  # No clusterResourceWhitelist: cluster-scoped resources are denied.
+  namespaceResourceBlacklist:
+    - group: ""
+      kind: ResourceQuota
+    - group: ""
+      kind: LimitRange
+    - group: networking.k8s.io
+      kind: NetworkPolicy
+    - group: rbac.authorization.k8s.io
+      kind: Role
+    - group: rbac.authorization.k8s.io
+      kind: RoleBinding
+  roles:
+    - name: admin
+      description: namespace-admins
+      policies:
+        - p, proj:acme:admin, applications, *, acme/*, allow
+        - p, proj:acme:admin, logs, get, acme/*, allow
+      groups:
+        - acme-admins
+    - name: dev
+      description: namespace-devs
+      policies:
+        - p, proj:acme:dev, applications, get, acme/*, allow
+        - p, proj:acme:dev, applications, create, acme/*, allow
+        - p, proj:acme:dev, applications, update, acme/*, allow
+        - p, proj:acme:dev, applications, sync, acme/*, allow
+        - p, proj:acme:dev, applications, action/*, acme/*, allow
+        - p, proj:acme:dev, logs, get, acme/*, allow
+      groups:
+        - acme-devs
+    - name: readonly
+      description: namespace-ro
+      policies:
+        - p, proj:acme:readonly, applications, get, acme/*, allow
+        - p, proj:acme:readonly, logs, get, acme/*, allow
+      groups:
+        - acme-ro

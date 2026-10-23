@@ -1,0 +1,50 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: globex
+  namespace: openshift-gitops
+spec:
+  description: Workload project for tenant globex
+  sourceRepos:
+    - "*"
+  destinations:
+    - namespace: globex
+      server: https://kubernetes.default.svc
+  # No clusterResourceWhitelist: cluster-scoped resources are denied.
+  namespaceResourceBlacklist:
+    - group: ""
+      kind: ResourceQuota
+    - group: ""
+      kind: LimitRange
+    - group: networking.k8s.io
+      kind: NetworkPolicy
+    - group: rbac.authorization.k8s.io
+      kind: Role
+    - group: rbac.authorization.k8s.io
+      kind: RoleBinding
+  roles:
+    - name: admin
+      description: namespace-admins
+      policies:
+        - p, proj:globex:admin, applications, *, globex/*, allow
+        - p, proj:globex:admin, logs, get, globex/*, allow
+      groups:
+        - globex-admins
+    - name: dev
+      description: namespace-devs
+      policies:
+        - p, proj:globex:dev, applications, get, globex/*, allow
+        - p, proj:globex:dev, applications, create, globex/*, allow
+        - p, proj:globex:dev, applications, update, globex/*, allow
+        - p, proj:globex:dev, applications, sync, globex/*, allow
+        - p, proj:globex:dev, applications, action/*, globex/*, allow
+        - p, proj:globex:dev, logs, get, globex/*, allow
+      groups:
+        - globex-devs
+    - name: readonly
+      description: namespace-ro
+      policies:
+        - p, proj:globex:readonly, applications, get, globex/*, allow
+        - p, proj:globex:readonly, logs, get, globex/*, allow
+      groups:
+        - globex-ro

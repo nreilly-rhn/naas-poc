@@ -1,0 +1,4 @@
+name: acme
+namespaceAdmins: acme-admins
+namespaceDevs: acme-devs
+namespaceRo: acme-ro

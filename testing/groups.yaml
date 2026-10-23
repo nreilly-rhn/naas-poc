@@ -1,0 +1,41 @@
+apiVersion: user.openshift.io/v1
+kind: Group
+metadata:
+  name: acme-admins
+users:
+  - acme-admin
+---
+apiVersion: user.openshift.io/v1
+kind: Group
+metadata:
+  name: acme-devs
+users:
+  - acme-dev
+---
+apiVersion: user.openshift.io/v1
+kind: Group
+metadata:
+  name: acme-ro
+users:
+  - acme-reader
+---
+apiVersion: user.openshift.io/v1
+kind: Group
+metadata:
+  name: globex-admins
+users:
+  - globex-admin
+---
+apiVersion: user.openshift.io/v1
+kind: Group
+metadata:
+  name: globex-devs
+users:
+  - globex-dev
+---
+apiVersion: user.openshift.io/v1
+kind: Group
+metadata:
+  name: globex-ro
+users:
+  - globex-reader
